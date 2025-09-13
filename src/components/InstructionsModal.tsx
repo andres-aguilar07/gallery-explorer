@@ -5,7 +5,8 @@ import {
     StyleSheet,
     Modal,
     TouchableOpacity,
-    Dimensions
+    Dimensions,
+    Linking
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -75,6 +76,16 @@ export const InstructionsModal: React.FC<InstructionsModalProps> = ({ visible, o
         }
     };
 
+    const openGitHub = async () => {
+        const url = 'https://github.com/andres-aguilar07';
+
+        try {
+            await Linking.openURL(url);
+        } catch (error) {
+            console.log('Error abriendo enlace:', error);
+        }
+    };
+
     return (
         <Modal
             animationType="fade"
@@ -131,6 +142,12 @@ export const InstructionsModal: React.FC<InstructionsModalProps> = ({ visible, o
                                 )}
                             </View>
                             <Text style={styles.checkboxText}>No volver a mostrar</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.githubLink} onPress={openGitHub}>
+                            <Text>Sígueme: </Text>
+                            <Ionicons name="logo-github" size={16} color="#007AFF" />
+                            <Text style={styles.githubText}>@andres-aguilar07</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -258,5 +275,17 @@ const styles = StyleSheet.create({
     checkboxText: {
         fontSize: 14,
         color: '#666',
+    },
+    githubLink: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 12,
+        paddingVertical: 4,
+    },
+    githubText: {
+        fontSize: 14,
+        color: '#007AFF',
+        marginLeft: 6,
+        textDecorationLine: 'underline',
     },
 });

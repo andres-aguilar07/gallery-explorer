@@ -6,8 +6,8 @@
 
 ¡Hola! Soy **Andrés Aguilar**, un desarrollador apasionado por crear soluciones prácticas que resuelvan problemas del día a día. Puedes encontrarme en:
 
-- 🐙 **GitHub**: [@tu-usuario-github](https://github.com/tu-usuario-github)
-- 💼 **LinkedIn**: [Tu perfil de LinkedIn](https://www.linkedin.com/in/andresf-aguilar/)
+- 🐙 **GitHub**: [@andres-aguilar07](https://github.com/tu-usuario-github)
+- 💼 **LinkedIn**: [Andrés Aguilar](https://www.linkedin.com/in/andresf-aguilar/)
 - 📧 **Email**: andresaguilarm0407@gmail.com
 
 ## 🤔 ¿Por qué creé esta aplicación?

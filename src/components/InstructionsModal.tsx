@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -8,6 +8,7 @@ import {
     Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -16,7 +17,64 @@ interface InstructionsModalProps {
     onClose: () => void;
 }
 
+const DONT_SHOW_AGAIN_KEY = '@gallery_explorer_dont_show_instructions';
+
+export const checkShouldShowInstructions = async (): Promise<boolean> => {
+    try {
+        const dontShow = await AsyncStorage.getItem(DONT_SHOW_AGAIN_KEY);
+        // Si no existe el valor, mostrar por defecto
+        // Si es 'true', no mostrar
+        // Si es 'false', mostrar
+        return dontShow !== 'true';
+    } catch (error) {
+        console.log('Error verificando preferencia:', error);
+        return true; // Mostrar por defecto si hay error
+    }
+};
+
 export const InstructionsModal: React.FC<InstructionsModalProps> = ({ visible, onClose }) => {
+    const [dontShowAgain, setDontShowAgain] = useState(false);
+
+    // Cargar el estado inicial del checkbox cuando el modal se abre
+    useEffect(() => {
+        const loadCheckboxState = async () => {
+            if (visible) {
+                try {
+                    const savedValue = await AsyncStorage.getItem(DONT_SHOW_AGAIN_KEY);
+                    setDontShowAgain(savedValue === 'true');
+                } catch (error) {
+                    console.log('Error cargando estado del checkbox:', error);
+                    setDontShowAgain(false);
+                }
+            }
+        };
+
+        loadCheckboxState();
+    }, [visible]);
+
+    const handleClose = async () => {
+        if (dontShowAgain) {
+            try {
+                await AsyncStorage.setItem(DONT_SHOW_AGAIN_KEY, 'true');
+            } catch (error) {
+                console.log('Error guardando preferencia:', error);
+            }
+        }
+        onClose();
+    };
+
+    const toggleDontShowAgain = async () => {
+        const newValue = !dontShowAgain;
+        setDontShowAgain(newValue);
+
+        // Actualizar AsyncStorage inmediatamente cuando cambia el estado
+        try {
+            await AsyncStorage.setItem(DONT_SHOW_AGAIN_KEY, newValue.toString());
+        } catch (error) {
+            console.log('Error actualizando preferencia:', error);
+        }
+    };
+
     return (
         <Modal
             animationType="fade"
@@ -28,7 +86,7 @@ export const InstructionsModal: React.FC<InstructionsModalProps> = ({ visible, o
                 <View style={styles.modalContainer}>
                     <View style={styles.header}>
                         <Text style={styles.title}>¿Cómo usar Gallery Explorer?</Text>
-                        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                        <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
                             <Ionicons name="close" size={24} color="#666" />
                         </TouchableOpacity>
                     </View>
@@ -48,7 +106,7 @@ export const InstructionsModal: React.FC<InstructionsModalProps> = ({ visible, o
                                 <Text style={styles.stepNumberText}>2</Text>
                             </View>
                             <Text style={styles.stepText}>
-                                Cuando termines, presiona <Text style={styles.deleteButtonText}>"Borrar fotos descartadas"</Text>
+                                Cuando termines, presiona <Text style={styles.deleteButtonText}>"Borrar elementos descartados"</Text>
                             </Text>
                         </View>
 
@@ -57,12 +115,26 @@ export const InstructionsModal: React.FC<InstructionsModalProps> = ({ visible, o
                                 <Text style={styles.stepNumberText}>3</Text>
                             </View>
                             <Text style={styles.stepText}>
-                                ¡Listo! Tu galería estará limpia y las fotos estarán en papelera por si las necesitas
+                                ¡Listo! Tu galería estará limpia (las fotos y videos estarán en papelera por si las necesitas)
                             </Text>
                         </View>
                     </View>
 
-                    <TouchableOpacity style={styles.gotItButton} onPress={onClose}>
+                    <View style={styles.checkboxContainer}>
+                        <TouchableOpacity
+                            style={styles.checkbox}
+                            onPress={toggleDontShowAgain}
+                        >
+                            <View style={[styles.checkboxBox, dontShowAgain && styles.checkboxChecked]}>
+                                {dontShowAgain && (
+                                    <Ionicons name="checkmark" size={16} color="white" />
+                                )}
+                            </View>
+                            <Text style={styles.checkboxText}>No volver a mostrar</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity style={styles.gotItButton} onPress={handleClose}>
                         <Text style={styles.gotItText}>¡Entendido!</Text>
                     </TouchableOpacity>
                 </View>
@@ -74,7 +146,7 @@ export const InstructionsModal: React.FC<InstructionsModalProps> = ({ visible, o
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 20,
@@ -161,5 +233,30 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
         fontWeight: '600',
+    },
+    checkboxContainer: {
+        marginBottom: 20,
+    },
+    checkbox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    checkboxBox: {
+        width: 20,
+        height: 20,
+        borderWidth: 2,
+        borderColor: '#007AFF',
+        borderRadius: 4,
+        marginRight: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'transparent',
+    },
+    checkboxChecked: {
+        backgroundColor: '#007AFF',
+    },
+    checkboxText: {
+        fontSize: 14,
+        color: '#666',
     },
 });

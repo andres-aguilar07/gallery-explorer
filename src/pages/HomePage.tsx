@@ -11,7 +11,7 @@ import {
 import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { useGallery } from '../hooks/useGallery';
-import { InstructionsModal } from '../components/InstructionsModal';
+import { InstructionsModal, checkShouldShowInstructions } from '../components/InstructionsModal';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const imageSize = screenWidth * 0.8;
@@ -32,8 +32,15 @@ export const HomePage = () => {
     const [showInstructions, setShowInstructions] = useState(false);
 
     useEffect(() => {
-        // Mostrar instrucciones al inicio
-        setShowInstructions(true);
+        // Verificar si se deben mostrar las instrucciones al inicio
+        const checkAndShowInstructions = async () => {
+            const shouldShow = await checkShouldShowInstructions();
+            if (shouldShow) {
+                setShowInstructions(true);
+            }
+        };
+
+        checkAndShowInstructions();
     }, []);
 
     const handleKeep = () => {

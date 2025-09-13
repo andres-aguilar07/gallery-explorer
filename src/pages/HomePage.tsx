@@ -85,7 +85,8 @@ export const HomePage = () => {
                     style={styles.media}
                     useNativeControls
                     resizeMode={ResizeMode.CONTAIN}
-                    shouldPlay={false}
+                    shouldPlay={true}
+                    isLooping={false}
                 />
             );
         } else {
